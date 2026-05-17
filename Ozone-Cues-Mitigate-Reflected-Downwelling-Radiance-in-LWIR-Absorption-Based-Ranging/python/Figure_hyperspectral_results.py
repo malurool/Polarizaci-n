@@ -3,11 +3,12 @@ import sys
 from types import SimpleNamespace
 
 import matplotlib
+import matplotlib.patches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
-from scipy.io import loadmat
 from sklearn.cluster import KMeans
+from spectral.io import envi
 
 FUNCTIONS_DIR = os.path.join(os.path.dirname(__file__), "Functions")
 sys.path.insert(0, FUNCTIONS_DIR)
@@ -21,25 +22,8 @@ def save_fig(fig, path):
     fig.savefig(path + ".pdf", bbox_inches="tight")
     fig.savefig(path + ".jpg", bbox_inches="tight", dpi=150)
 
+
 from forward_model import forward_model
-
-
-def _mat_struct_to_namespace(mat_obj):
-    ns = SimpleNamespace()
-    for field in mat_obj._fieldnames:
-        value = getattr(mat_obj, field)
-        if hasattr(value, "_fieldnames"):
-            value = _mat_struct_to_namespace(value)
-        setattr(ns, field, value)
-    return ns
-
-
-def load_mat_as_namespace(path):
-    mat = loadmat(path, squeeze_me=True, struct_as_record=False)
-    data = {key: value for key, value in mat.items() if not key.startswith("__")}
-    if len(data) == 1 and hasattr(list(data.values())[0], "_fieldnames"):
-        return _mat_struct_to_namespace(list(data.values())[0])
-    return SimpleNamespace(**data)
 
 
 def get_parula():
@@ -49,59 +33,93 @@ def get_parula():
         return matplotlib.colormaps["viridis"]
 
 
-def load_array(data_dir, name, key):
-    npz_path = os.path.join(data_dir, f"{name}.npz")
-    mat_path = os.path.join(data_dir, f"{name}.mat")
-    if os.path.exists(npz_path):
-        with np.load(npz_path, allow_pickle=False) as data:
-            return data[key]
-    return loadmat(mat_path, squeeze_me=True)[key]
+def load_npz(results_dir, name):
+    path = os.path.join(results_dir, f"{name}.npz")
+    with np.load(path, allow_pickle=False) as data:
+        return SimpleNamespace(**{key: data[key] for key in data.files})
 
 
-def load_results(results_dir, name):
-    npz_path = os.path.join(results_dir, f"{name}.npz")
-    mat_path = os.path.join(results_dir, f"{name}.mat")
-    if os.path.exists(npz_path):
-        with np.load(npz_path, allow_pickle=True) as data:
-            return SimpleNamespace(**{key: data[key] for key in data.files})
-    return load_mat_as_namespace(mat_path)
+def load_hdr_cube(hdr_path, n_bands=247):
+    img = envi.open(hdr_path)
+    cube = np.asarray(img.load())[:, :, :n_bands]
+    wavelength = img.metadata.get("wavelength")
+    if wavelength is not None:
+        wavelength = np.array([float(v) for v in wavelength])[:n_bands]
+        if np.nanmax(wavelength) > 100:
+            wavelength = wavelength / 1000.0
+    return cube, wavelength
 
 
 plt.close("all")
 
-DATA_DIR = os.getenv("DATA_DIR", "")  # Enter data directory
-RESULTS_DIR = os.getenv("RESULTS_DIR", "")  # Enter results directory
+HDR_PATH   = os.getenv("HDR_PATH", "")
+DATA_DIR   = os.getenv("DATA_DIR", "")
+RESULTS_DIR = os.getenv("RESULTS_DIR", "")
+SCENE_NAME  = os.getenv("SCENE_NAME", "")
 
 K = 247
 Q = 10
 
-no_downwelling = load_results(RESULTS_DIR, "no_downwelling")
-with_downwelling = load_results(RESULTS_DIR, "downwelling")
-with_downwelling_reg = load_results(RESULTS_DIR, "downwelling_reg")
+no_downwelling      = load_npz(RESULTS_DIR, f"{SCENE_NAME}_no_downwelling")
+with_downwelling    = load_npz(RESULTS_DIR, f"{SCENE_NAME}_downwelling")
 
 no_downwelling.d = no_downwelling.d.astype(float)
 with_downwelling.d = with_downwelling.d.astype(float)
-with_downwelling_reg.d = with_downwelling_reg.d.astype(float)
 
 no_downwelling.d[no_downwelling.d == 0] = np.nan
 with_downwelling.d[with_downwelling.d == 0] = np.nan
-with_downwelling_reg.d[with_downwelling_reg.d == 0] = np.nan
 
-no_downwelling.V = no_downwelling.V[:, :, :, :Q]
+no_downwelling.V  = no_downwelling.V[:, :, :, :Q]
 with_downwelling.V = with_downwelling.V[:, :, :, :Q]
-with_downwelling_reg.V = with_downwelling_reg.V[:, :, :, :Q]
 
-lambda_vals = load_array(DATA_DIR, "lambda", "lambda")[:K]
-meas = loadmat(os.path.join(DATA_DIR, "DC2P5S1.mat"), squeeze_me=True)["measurements"][:256, 900:1156, :K]
-attenuation = load_array(DATA_DIR, "attenuation", "attenuation")[:K]
-reflected = load_array(DATA_DIR, "I_downwelling_res", "I_downwelling_res")[:K, :]
+# Load measurements and wavelength from .hdr/.bsq
+meas, lambda_vals = load_hdr_cube(HDR_PATH, n_bands=K)
+meas = meas[:, -256:, :]
 
-lidar = load_array(DATA_DIR, "lidar", "depthMap")[:256, 900:1156].astype(float)
-lidar[lidar == 0] = np.nan
+with np.load(os.path.join(DATA_DIR, "attenuation.npz"), allow_pickle=False) as f:
+    attenuation = f["attenuation"].ravel()[:K]
+with np.load(os.path.join(DATA_DIR, "I_downwelling_res.npz"), allow_pickle=False) as f:
+    reflected = f["I_downwelling_res"][:K, :]
+
+# Lidar is optional — skip if not present
+lidar_path = os.path.join(DATA_DIR, "lidar.npz")
+if os.path.exists(lidar_path):
+    with np.load(lidar_path, allow_pickle=False) as f:
+        lidar = f["depthMap"].astype(float)
+    lidar[lidar == 0] = np.nan
+    has_lidar = True
+else:
+    lidar = None
+    has_lidar = False
 
 lambda_vals = lambda_vals.reshape(1, 1, K)
 attenuation = attenuation.reshape(1, 1, K)
-reflected = reflected.reshape(1, 1, K, Q)
+reflected   = reflected.reshape(1, 1, K, Q)
+
+# ── Selected pixels for per-pixel analysis (1-indexed row, col).
+# Change these directly or override via SELECTED_PIXELS env var.
+_DEFAULT_PIXELS = [
+    (143, 16),   # Reflective panel 1
+    (160, 16),   # Reflective panel 2
+    (130, 16),   # Grass
+    ( 40, 16),   # Tree
+    ( 80, 160),  # Background forest
+    (  5, 16),   # Sky
+]
+_DEFAULT_LABELS = ["Refl. panel 1", "Refl. panel 2", "Grass", "Tree", "Background forest", "Sky"]
+_PIXEL_COLORS   = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]
+
+_env_px = os.getenv("SELECTED_PIXELS", "")
+if _env_px.strip():
+    _DEFAULT_PIXELS = [tuple(int(x) for x in p.split(",")) for p in _env_px.split(";")]
+    _DEFAULT_LABELS = [f"Pixel ({r},{c})" for r, c in _DEFAULT_PIXELS]
+
+pixel_reflective_panel_1 = _DEFAULT_PIXELS[0]
+pixel_reflective_panel_2 = _DEFAULT_PIXELS[1] if len(_DEFAULT_PIXELS) > 1 else _DEFAULT_PIXELS[0]
+pixel_grass_area         = _DEFAULT_PIXELS[2] if len(_DEFAULT_PIXELS) > 2 else _DEFAULT_PIXELS[0]
+pixel_tree               = _DEFAULT_PIXELS[3] if len(_DEFAULT_PIXELS) > 3 else _DEFAULT_PIXELS[0]
+pixel_background_forest  = _DEFAULT_PIXELS[4] if len(_DEFAULT_PIXELS) > 4 else _DEFAULT_PIXELS[0]
+pixel_sky                = _DEFAULT_PIXELS[5] if len(_DEFAULT_PIXELS) > 5 else _DEFAULT_PIXELS[0]
 
 center_target_1 = (187, 86)
 center_target_2 = (145, 18)
@@ -139,55 +157,18 @@ ax2.set_aspect("equal")
 ax2.axis("off")
 ax2.axvline(line_index - 1, color=[1, 0, 0], linewidth=2, linestyle="--")
 
-fig3, ax3 = plt.subplots(num=3)
-ax3.imshow(with_downwelling_reg.d[:, :], cmap=cmap)
-ax3.images[0].set_clim(cut_off_1, cut_off_2)
-cb3 = fig3.colorbar(ax3.images[0], ax=ax3, orientation="horizontal", pad=0.05)
-cb3.set_label("Distance (m)")
-cb3.set_ticks([cut_off_1, cut_off_2])
-cb3.set_ticklabels([str(cut_off_1), str(cut_off_2)])
-ax3.tick_params(labelsize=20)
-ax3.set_aspect("equal")
-ax3.axis("off")
-ax3.axvline(line_index - 1, color=[1, 0, 0], linewidth=2, linestyle="--")
-
-fig4, ax4 = plt.subplots(num=4)
-colors = np.vstack(([0, 0, 0, 1], get_parula()(np.linspace(0, 1, 256))[::-1]))
-ax4.imshow(lidar, cmap=ListedColormap(colors))
-ax4.text(center_target_1[1] - 6, center_target_1[0] - 1, "(f)", color="red", fontsize=10, fontweight="bold")
-ax4.text(center_target_2[1] - 6, center_target_2[0] - 1, "(g)", color="red", fontsize=10, fontweight="bold")
-ax4.text(center_tree[1] - 6, center_tree[0] - 1, "(h)", color="red", fontsize=10, fontweight="bold")
-ax4.images[0].set_clim(cut_off_1, cut_off_2)
-cb4 = fig4.colorbar(ax4.images[0], ax=ax4, orientation="horizontal", pad=0.05)
-cb4.set_label("Distance (m)")
-cb4.set_ticks([cut_off_1, cut_off_2])
-cb4.set_ticklabels([str(cut_off_1), str(cut_off_2)])
-ax4.tick_params(labelsize=20)
-ax4.set_aspect("equal")
-ax4.axis("off")
-ax4.axvline(line_index - 1, color=[1, 0, 0], linewidth=2, linestyle="--")
-
 fig5 = plt.figure(num=5)
 fig5.set_size_inches(3.5 * 5.6, 2.5)
 ax5 = fig5.add_subplot(111)
-ax5.plot(no_downwelling.d[:, line_index - 1], linewidth=2)
-ax5.plot(with_downwelling.d[:, line_index - 1], linewidth=2)
-ax5.plot(with_downwelling_reg.d[:, line_index - 1], linewidth=2)
-ax5.plot(lidar[:, line_index - 1], "--", linewidth=3, color=[0, 0, 0])
+ax5.plot(no_downwelling.d[:, line_index - 1], linewidth=2, label="Without downwelling correction")
+ax5.plot(with_downwelling.d[:, line_index - 1], linewidth=2, label="Downwelling correction")
+if has_lidar:
+    ax5.plot(lidar[:, line_index - 1], "--", linewidth=3, color=[0, 0, 0], label="Lidar (ground truth)")
 ax5.set_ylim([15, 200])
 ax5.set_xlim([0, 256])
 ax5.set_xlabel("Pixel Index")
 ax5.set_ylabel("Distance (m)")
-ax5.legend(
-    [
-        "Without downwelling correction",
-        "Downwelling correction",
-        "Downwelling correction (TV)",
-        "Lidar (ground truth)",
-    ],
-    loc="upper right",
-    ncol=2,
-)
+ax5.legend(loc="upper right", ncol=2)
 ax5.tick_params(labelsize=15)
 
 patch_size = 8
@@ -204,35 +185,25 @@ def extract_patch(M, cp):
 
 patch_t1_d1 = extract_patch(no_downwelling.d, center_target_1)
 patch_t1_d2 = extract_patch(with_downwelling.d, center_target_1)
-patch_t1_tv = extract_patch(with_downwelling_reg.d, center_target_1)
-patch_t1_lidar = extract_patch(lidar, center_target_1)
 
 patch_t2_d1 = extract_patch(no_downwelling.d, center_target_2)
 patch_t2_d2 = extract_patch(with_downwelling.d, center_target_2)
-patch_t2_tv = extract_patch(with_downwelling_reg.d, center_target_2)
-patch_t2_lidar = extract_patch(lidar, center_target_2)
 
 patch_tree_d1 = extract_patch(no_downwelling.d, center_tree)
 patch_tree_d2 = extract_patch(with_downwelling.d, center_tree)
-patch_tree_tv = extract_patch(with_downwelling_reg.d, center_tree)
-patch_tree_lidar = extract_patch(lidar, center_tree)
 
-all_values = np.concatenate(
-    [
-        patch_t1_d1.ravel(),
-        patch_t1_d2.ravel(),
-        patch_t1_tv.ravel(),
-        patch_t1_lidar.ravel(),
-        patch_t2_d1.ravel(),
-        patch_t2_d2.ravel(),
-        patch_t2_tv.ravel(),
-        patch_t2_lidar.ravel(),
-        patch_tree_d1.ravel(),
-        patch_tree_d2.ravel(),
-        patch_tree_tv.ravel(),
-        patch_tree_lidar.ravel(),
+all_values_list = [
+    patch_t1_d1.ravel(), patch_t1_d2.ravel(),
+    patch_t2_d1.ravel(), patch_t2_d2.ravel(),
+    patch_tree_d1.ravel(), patch_tree_d2.ravel(),
+]
+if has_lidar:
+    all_values_list += [
+        extract_patch(lidar, center_target_1).ravel(),
+        extract_patch(lidar, center_target_2).ravel(),
+        extract_patch(lidar, center_tree).ravel(),
     ]
-)
+all_values = np.concatenate(all_values_list)
 
 bin_width = 5
 bin_min = np.floor(np.nanmin(all_values) / bin_width) * bin_width
@@ -241,15 +212,14 @@ bin_edges = np.arange(bin_min, bin_max + bin_width, bin_width)
 
 color_d1 = [0, 0, 1]
 color_d2 = [1, 0, 0]
-color_tv = [1, 1, 0]
 color_gt = [0, 0, 0]
 
 fig101, ax101 = plt.subplots(num=101)
 fig101.set_size_inches(7, 4.2)
 ax101.hist(patch_t1_d1.ravel(), bins=bin_edges, color=color_d1, alpha=0.6, label="w/o down. corr.")
 ax101.hist(patch_t1_d2.ravel(), bins=bin_edges, color=color_d2, alpha=0.6, label="w/ down. corr.")
-ax101.hist(patch_t1_tv.ravel(), bins=bin_edges, color=color_tv, alpha=0.6, label="w/ down. corr. (TV)")
-ax101.hist(patch_t1_lidar.ravel(), bins=bin_edges, color=color_gt, alpha=0.6, label="Lidar (GT)")
+if has_lidar:
+    ax101.hist(extract_patch(lidar, center_target_1).ravel(), bins=bin_edges, color=color_gt, alpha=0.6, label="Lidar (GT)")
 ax101.legend()
 ax101.set_xlabel("Distance (m)")
 ax101.set_ylabel("Count")
@@ -259,8 +229,8 @@ fig102, ax102 = plt.subplots(num=102)
 fig102.set_size_inches(7, 4.2)
 ax102.hist(patch_t2_d1.ravel(), bins=bin_edges, color=color_d1, alpha=0.6, label="w/o down. corr.")
 ax102.hist(patch_t2_d2.ravel(), bins=bin_edges, color=color_d2, alpha=0.6, label="w/ down. corr.")
-ax102.hist(patch_t2_tv.ravel(), bins=bin_edges, color=color_tv, alpha=0.6, label="w/ down. corr. (TV)")
-ax102.hist(patch_t2_lidar.ravel(), bins=bin_edges, color=color_gt, alpha=0.6, label="Lidar (GT)")
+if has_lidar:
+    ax102.hist(extract_patch(lidar, center_target_2).ravel(), bins=bin_edges, color=color_gt, alpha=0.6, label="Lidar (GT)")
 ax102.legend()
 ax102.set_xlabel("Distance (m)")
 ax102.set_ylabel("Count")
@@ -270,8 +240,8 @@ fig103, ax103 = plt.subplots(num=103)
 fig103.set_size_inches(7, 4.2)
 ax103.hist(patch_tree_d1.ravel(), bins=bin_edges, color=color_d1, alpha=0.6, label="w/o down. corr.")
 ax103.hist(patch_tree_d2.ravel(), bins=bin_edges, color=color_d2, alpha=0.6, label="w/ down. corr.")
-ax103.hist(patch_tree_tv.ravel(), bins=bin_edges, color=color_tv, alpha=0.6, label="w/ down. corr. (TV)")
-ax103.hist(patch_tree_lidar.ravel(), bins=bin_edges, color=color_gt, alpha=0.6, label="Lidar (GT)")
+if has_lidar:
+    ax103.hist(extract_patch(lidar, center_tree).ravel(), bins=bin_edges, color=color_gt, alpha=0.6, label="Lidar (GT)")
 ax103.legend()
 ax103.set_xlabel("Distance (m)")
 ax103.set_ylabel("Count")
@@ -280,46 +250,16 @@ ax103.tick_params(labelsize=25)
 print("\n--- Patch Statistics (Mean ± Std, ignoring NaNs) ---")
 
 print("\nCalibration Target 1:")
-print(
-    f"  Without downwelling correction: {np.nanmean(patch_t1_d1):.2f} ± {np.nanstd(patch_t1_d1, ddof=1):.2f} m"
-)
-print(
-    f"  Downwelling correction:         {np.nanmean(patch_t1_d2):.2f} ± {np.nanstd(patch_t1_d2, ddof=1):.2f} m"
-)
-print(
-    f"  Downwelling correction (TV):    {np.nanmean(patch_t1_tv):.2f} ± {np.nanstd(patch_t1_tv, ddof=1):.2f} m"
-)
-print(
-    f"  Lidar (Ground Truth):           {np.nanmean(patch_t1_lidar):.2f} ± {np.nanstd(patch_t1_lidar, ddof=1):.2f} m"
-)
+print(f"  Without downwelling correction: {np.nanmean(patch_t1_d1):.2f} ± {np.nanstd(patch_t1_d1, ddof=1):.2f} m")
+print(f"  Downwelling correction:         {np.nanmean(patch_t1_d2):.2f} ± {np.nanstd(patch_t1_d2, ddof=1):.2f} m")
 
 print("\nCalibration Target 2:")
-print(
-    f"  Without downwelling correction: {np.nanmean(patch_t2_d1):.2f} ± {np.nanstd(patch_t2_d1, ddof=1):.2f} m"
-)
-print(
-    f"  Downwelling correction:         {np.nanmean(patch_t2_d2):.2f} ± {np.nanstd(patch_t2_d2, ddof=1):.2f} m"
-)
-print(
-    f"  Downwelling correction (TV):    {np.nanmean(patch_t2_tv):.2f} ± {np.nanstd(patch_t2_tv, ddof=1):.2f} m"
-)
-print(
-    f"  Lidar (Ground Truth):           {np.nanmean(patch_t2_lidar):.2f} ± {np.nanstd(patch_t2_lidar, ddof=1):.2f} m"
-)
+print(f"  Without downwelling correction: {np.nanmean(patch_t2_d1):.2f} ± {np.nanstd(patch_t2_d1, ddof=1):.2f} m")
+print(f"  Downwelling correction:         {np.nanmean(patch_t2_d2):.2f} ± {np.nanstd(patch_t2_d2, ddof=1):.2f} m")
 
 print("\nTree:")
-print(
-    f"  Without downwelling correction: {np.nanmean(patch_tree_d1):.2f} ± {np.nanstd(patch_tree_d1, ddof=1):.2f} m"
-)
-print(
-    f"  Downwelling correction:         {np.nanmean(patch_tree_d2):.2f} ± {np.nanstd(patch_tree_d2, ddof=1):.2f} m"
-)
-print(
-    f"  Downwelling correction (TV):    {np.nanmean(patch_tree_tv):.2f} ± {np.nanstd(patch_tree_tv, ddof=1):.2f} m"
-)
-print(
-    f"  Lidar (Ground Truth):           {np.nanmean(patch_tree_lidar):.2f} ± {np.nanstd(patch_tree_lidar, ddof=1):.2f} m"
-)
+print(f"  Without downwelling correction: {np.nanmean(patch_tree_d1):.2f} ± {np.nanstd(patch_tree_d1, ddof=1):.2f} m")
+print(f"  Downwelling correction:         {np.nanmean(patch_tree_d2):.2f} ± {np.nanstd(patch_tree_d2, ddof=1):.2f} m")
 
 T_air = 289.7
 
@@ -762,9 +702,7 @@ cb12.set_ticklabels([f"{cut_off_1} K", f"{cut_off_2} K"])
 _dr = os.path.join(FIGURES_DIR, "Hyperspectral_correction", "Range")
 save_fig(fig1, os.path.join(_dr, "hyperspectral_no_downwelling_range"))
 save_fig(fig2, os.path.join(_dr, "hyperspectral_with_downwelling_range"))
-save_fig(fig3, os.path.join(_dr, "hyperspectral_with_downwelling_TV"))
-save_fig(fig4, os.path.join(_dr, "hyperspectral_lidar"))
-save_fig(fig5, os.path.join(_dr, "hyperspectral_profile_comparison_TV"))
+save_fig(fig5, os.path.join(_dr, "hyperspectral_profile_comparison"))
 
 _dh = os.path.join(FIGURES_DIR, "Hyperspectral_correction")
 save_fig(fig101, os.path.join(_dh, "hyperspectral_histogram_calibration_target_1"))
@@ -783,5 +721,39 @@ _dt = os.path.join(FIGURES_DIR, "Hyperspectral_correction", "Temperature")
 save_fig(fig10, os.path.join(_dt, "hyperspectral_with_downwelling_temperature"))
 save_fig(fig11, os.path.join(_dt, "hyperspectral_no_downwelling_temperature"))
 save_fig(fig12, os.path.join(_dt, "hyperspectral_temperature_comparison"))
+
+# ── Pixel overlay on T and emissivity mean maps ──────────────────────────────
+eps_mean_no = no_downwelling.emissivity.mean(axis=2)
+eps_mean_dw = with_downwelling.emissivity.mean(axis=2)
+
+fig_ov, axes_ov = plt.subplots(1, 4, figsize=(18, 5))
+fig_ov.suptitle("Selected pixels on scene maps", fontsize=12)
+
+overlay_cfg = [
+    (with_downwelling.T[:, :],  "Temperature w/ dw (K)", "hot",     (285, 294)),
+    (no_downwelling.T[:, :],    "Temperature no dw (K)",  "hot",     (285, 294)),
+    (eps_mean_dw,               "Mean emissivity w/ dw",  "viridis", (0.7, 1.0)),
+    (eps_mean_no,               "Mean emissivity no dw",  "viridis", (0.7, 1.0)),
+]
+
+for ax_ov, (data, title, cm, clim) in zip(axes_ov, overlay_cfg):
+    im = ax_ov.imshow(data, cmap=cm, vmin=clim[0], vmax=clim[1])
+    ax_ov.set_title(title, fontsize=9)
+    ax_ov.axis("off")
+    fig_ov.colorbar(im, ax=ax_ov, orientation="horizontal", pad=0.02, fraction=0.046)
+    for px_idx, ((pr, pc), lbl) in enumerate(zip(_DEFAULT_PIXELS, _DEFAULT_LABELS)):
+        col = _PIXEL_COLORS[px_idx % len(_PIXEL_COLORS)]
+        ax_ov.plot(pc - 1, pr - 1, "o", color=col, markersize=6,
+                   markeredgecolor="white", markeredgewidth=0.6)
+
+# Legend outside
+handles = [
+    matplotlib.patches.Patch(color=_PIXEL_COLORS[i % len(_PIXEL_COLORS)], label=lbl)
+    for i, lbl in enumerate(_DEFAULT_LABELS)
+]
+fig_ov.legend(handles=handles, loc="lower center", ncol=len(_DEFAULT_LABELS),
+              fontsize=8, bbox_to_anchor=(0.5, -0.02))
+fig_ov.tight_layout()
+save_fig(fig_ov, os.path.join(_dt, "pixel_overlay_maps"))
 
 plt.show()

@@ -449,8 +449,8 @@ def solve_full_scene(HSI_directory, filename, downwelling_flag=True, chunk_size=
 
     scene_name = os.path.splitext(os.path.basename(filename))[0]
     suffix = 'downwelling' if downwelling_flag else 'no_downwelling'
-    savename = os.path.join(results_dir, f"{scene_name}_{suffix}.mat")
-    scipy.io.savemat(savename, {'V': V_out, 'T': T_out, 'emissivity': emissivity_out, 'd': d_out})
+    savename = os.path.join(results_dir, f"{scene_name}_{suffix}.npz")
+    np.savez(savename, V=V_out, T=T_out, emissivity=emissivity_out, d=d_out)
     print(f"Saved: {savename}")
 
     return V_out, T_out, emissivity_out, d_out
@@ -466,7 +466,7 @@ def main():
     lr = .01 # Optimizer learning rate
     emiss_reg = 1e7 # Emissivity smoothness regularization parameter
     TV_reg = 1e-4 # TV regularization parameter for distance d
-    downwelling_flag = True # False: ignore downwelling, True: use downwelling data
+    downwelling_flag = os.getenv("DOWNWELLING_FLAG", "True").strip().lower() != "false"
     chunk_size = 128 # Pixel chunk size for processing in GPU
     if downwelling_flag:
         num_iterations = 100000 # With downwelling requires more iterations

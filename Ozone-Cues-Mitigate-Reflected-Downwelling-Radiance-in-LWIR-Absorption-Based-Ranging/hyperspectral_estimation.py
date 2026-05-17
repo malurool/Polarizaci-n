@@ -1,5 +1,7 @@
 import os
 import scipy.io
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -386,6 +388,23 @@ def solve(wavelength, dw_r, T_env, measured, attenuation, T_air, num_iterations=
 
         if iteration % 1000 == 0:
             print(f"Iteration {iteration}/{num_iterations}, Loss: {loss.item()}")
+
+    # Save loss curve
+    figures_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Figures', 'Training')
+    os.makedirs(figures_dir, exist_ok=True)
+    fig_loss, ax_loss = plt.subplots(figsize=(10, 4))
+    ax_loss.semilogy(total_losses, label='Total Loss')
+    ax_loss.semilogy(l2_losses, label='L2 Loss')
+    ax_loss.semilogy(reg_losses, label='Regularization')
+    ax_loss.set_xlabel('Iteration')
+    ax_loss.set_ylabel('Loss')
+    ax_loss.set_title('Training Loss')
+    ax_loss.legend()
+    ax_loss.grid(True, alpha=0.3)
+    fig_loss.tight_layout()
+    fig_loss.savefig(os.path.join(figures_dir, 'loss.pdf'), bbox_inches='tight')
+    fig_loss.savefig(os.path.join(figures_dir, 'loss.jpg'), bbox_inches='tight', dpi=150)
+    plt.close(fig_loss)
 
     return V_r.detach().cpu().numpy(), T_r.detach().cpu().numpy(), emissivity_r.detach().cpu().numpy(), d_r.detach().cpu().numpy()
 

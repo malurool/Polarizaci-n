@@ -179,16 +179,16 @@ hyper_dw_path = os.path.join(RESULTS_DIR, f"{SCENE_NAME}_downwelling.npz")
 hyper_no_path = os.path.join(RESULTS_DIR, f"{SCENE_NAME}_no_downwelling.npz")
 
 with np.load(hyper_dw_path, allow_pickle=False) as f:
-    d_hyper_dw   = f["d"][:, :, 0, 0].astype(float)
-    T_hyper_dw   = f["T"][:, :, 0, 0].astype(float)
-    eps_hyper_dw = f["emissivity"].astype(float)
-    V_hyper_dw   = f["V"].astype(float)
+    d_hyper_dw   = f["d"].squeeze().astype(float)
+    T_hyper_dw   = f["T"].squeeze().astype(float)
+    eps_hyper_dw = f["emissivity"].squeeze().astype(float)
+    V_hyper_dw   = f["V"].astype(float)[:, :, :, :Q]   # (N,M,1,Q)
 
 with np.load(hyper_no_path, allow_pickle=False) as f:
-    d_hyper_no   = f["d"][:, :, 0, 0].astype(float)
-    T_hyper_no   = f["T"][:, :, 0, 0].astype(float)
-    eps_hyper_no = f["emissivity"].astype(float)
-    V_hyper_no   = f["V"].astype(float)
+    d_hyper_no   = f["d"].squeeze().astype(float)
+    T_hyper_no   = f["T"].squeeze().astype(float)
+    eps_hyper_no = f["emissivity"].squeeze().astype(float)
+    V_hyper_no   = f["V"].astype(float)[:, :, :, :Q]   # (N,M,1,Q)
 
 d_hyper_dw[d_hyper_dw == 0] = np.nan
 d_hyper_no[d_hyper_no == 0] = np.nan
@@ -346,21 +346,21 @@ lambda_vec = lambda_vals.ravel()
 with np.load(os.path.join(DATA_DIR, "I_downwelling_res.npz"), allow_pickle=False) as f:
     reflected = f["I_downwelling_res"][:247, :]
 
-K   = 247
-Q   = V_hyper_dw.shape[3]
 lv  = lambda_vals.reshape(1, 1, K)
 att = attenuation.reshape(1, 1, K)
 ref = reflected.reshape(1, 1, K, Q)
 
 n_px = len(DEFAULT_PIXELS)
 fig_px, axes_px = plt.subplots(n_px, 2, figsize=(12, 3.5 * n_px))
+if n_px == 1:
+    axes_px = axes_px[np.newaxis, :]
 fig_px.suptitle("Per-pixel radiance fit & residual (Hyperspectral w/ downwelling)", fontsize=12)
 
 for px_idx, ((pr, pc), label) in enumerate(zip(DEFAULT_PIXELS, PIXEL_LABELS)):
     r, c = pr - 1, pc - 1
     col  = PIXEL_COLORS[px_idx % len(PIXEL_COLORS)]
 
-    V_px   = V_hyper_dw[r, c, 0, :Q].reshape(1, 1, 1, Q)
+    V_px   = V_hyper_dw[r, c, 0, :].reshape(1, 1, 1, Q)
     T_px   = float(T_hyper_dw[r, c])
     eps_px = eps_hyper_dw[r, c, :].reshape(1, 1, K)
     d_px   = float(d_hyper_dw[r, c]) if not np.isnan(d_hyper_dw[r, c]) else 0.0

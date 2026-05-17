@@ -36,7 +36,12 @@ def get_parula():
 def load_npz(results_dir, name):
     path = os.path.join(results_dir, f"{name}.npz")
     with np.load(path, allow_pickle=False) as data:
-        return SimpleNamespace(**{key: data[key] for key in data.files})
+        ns = SimpleNamespace(**{key: data[key] for key in data.files})
+    # Squeeze trailing singleton dims: (N,M,1,1)->(N,M), (N,M,K,1)->(N,M,K)
+    ns.d          = ns.d.squeeze()
+    ns.T          = ns.T.squeeze()
+    ns.emissivity = ns.emissivity.squeeze()
+    return ns
 
 
 def load_hdr_cube(hdr_path, n_bands=247):

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import matplotlib
 matplotlib.use('Agg')
+matplotlib.rcParams['figure.max_open_warning'] = 50
 import matplotlib.patches
 import matplotlib.pyplot as plt
 import numpy as np

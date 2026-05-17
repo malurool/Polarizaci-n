@@ -83,6 +83,9 @@ OZONE_BAND      = 77 - 1
 OZONE_CLEAR     = 81 - 1
 PAIR_INDEX      = 7   # which water-vapor pair to use for bispectral
 
+K = 247   # number of spectral bands used
+Q = 10    # number of downwelling radiance components
+
 DEPTH_CLIM = (0, 150)   # colorbar limits for depth maps (m)
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

@@ -138,7 +138,7 @@ def nanmae(est, gt):
 
 print("Loading data...")
 meas, lambda_vals = load_hdr(HDR_PATH, n_bands=247)
-meas = meas[:, -256:, :]   # same crop as hyperspectral_estimation
+meas = meas[:256, 900:1156, :]   # same crop as bispectral/hyperspectral
 
 with np.load(os.path.join(DATA_DIR, "attenuation.npz"), allow_pickle=False) as f:
     attenuation = f["attenuation"].ravel()[:247]
@@ -148,7 +148,7 @@ with np.load(os.path.join(DATA_DIR, "lidar.npz"), allow_pickle=False) as f:
     lidar_full = f["depthMap"].astype(float)
 
 # Align lidar to same crop as meas
-lidar = lidar_full[:meas.shape[0], -meas.shape[1]:]
+lidar = lidar_full[:256, 900:1156]
 lidar[lidar == 0] = np.nan
 
 # ── Compute bispectral depth ─────────────────────────────────────────────────

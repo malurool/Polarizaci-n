@@ -81,7 +81,7 @@ with_downwelling.V = with_downwelling.V[:, :, :, :Q]
 
 # Load measurements and wavelength from .hdr/.bsq
 meas, lambda_vals = load_hdr_cube(HDR_PATH, n_bands=K)
-meas = meas[:, -256:, :]
+meas = meas[:256, 900:1156, :]
 
 with np.load(os.path.join(DATA_DIR, "attenuation.npz"), allow_pickle=False) as f:
     attenuation = f["attenuation"].ravel()[:K]

@@ -410,7 +410,7 @@ def solve(wavelength, dw_r, T_env, measured, attenuation, T_air, num_iterations=
 
 def solve_full_scene(HSI_directory, filename, downwelling_flag=True, chunk_size=64, lr=1e-2, num_iterations=100000, emiss_reg=1e7, TV_reg=0):
     HSI, wavelength, dw_r, attenuation, T_air = load_data(HSI_directory, filename, downwelling_flag=downwelling_flag)
-    HSI = HSI[:, -256:, :, :]
+    HSI = HSI[:256, 900:1156, :, :]
 
     # Crop the first and second dimensions to be multiples of the chunk size
     crop_size_0 = (HSI.shape[0] // chunk_size) * chunk_size

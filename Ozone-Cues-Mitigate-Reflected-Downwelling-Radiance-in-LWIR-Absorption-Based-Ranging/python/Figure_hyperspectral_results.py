@@ -103,11 +103,11 @@ reflected   = reflected.reshape(1, 1, K, Q)
 # ── Selected pixels for per-pixel analysis (1-indexed row, col).
 # Change these directly or override via SELECTED_PIXELS env var.
 _DEFAULT_PIXELS = [
-    (143, 62),   # Reflective panel 1
-    (160, 62),   # Reflective panel 2
-    (130, 62),   # Grass
-    ( 80, 200),  # Tree
-    ( 40, 62),   # Background forest
+    (143, 16),   # Reflective panel 1
+    (160, 16),   # Reflective panel 2
+    (130, 16),   # Grass
+    ( 40, 16),   # Tree
+    ( 80, 160),  # Background forest
     (  5, 16),   # Sky
 ]
 _DEFAULT_LABELS = ["Refl. panel 1", "Refl. panel 2", "Grass", "Tree", "Background forest", "Sky"]
@@ -125,9 +125,9 @@ pixel_tree               = _DEFAULT_PIXELS[3] if len(_DEFAULT_PIXELS) > 3 else _
 pixel_background_forest  = _DEFAULT_PIXELS[4] if len(_DEFAULT_PIXELS) > 4 else _DEFAULT_PIXELS[0]
 pixel_sky                = _DEFAULT_PIXELS[5] if len(_DEFAULT_PIXELS) > 5 else _DEFAULT_PIXELS[0]
 
-center_target_1 = (143, 62)
-center_target_2 = (160, 62)
-center_tree = (80, 200)
+center_target_1 = (187, 86)
+center_target_2 = (145, 18)
+center_tree = (70, 160)
 
 line_index = 20
 

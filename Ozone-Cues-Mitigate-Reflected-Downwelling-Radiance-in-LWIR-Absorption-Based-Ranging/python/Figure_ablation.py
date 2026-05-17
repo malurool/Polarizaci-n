@@ -46,11 +46,11 @@ T_AIR       = float(os.getenv("T_AIR", "289.7"))
 # Selected pixels for per-pixel analysis (1-indexed row, col).
 # Change these directly or override via SELECTED_PIXELS env var.
 DEFAULT_PIXELS = [
-    (143, 62),   # Reflective panel 1
-    (160, 62),   # Reflective panel 2
-    (130, 62),   # Grass
-    ( 80, 200),  # Tree
-    ( 40, 62),   # Background forest
+    (143, 16),   # Reflective panel 1
+    (160, 16),   # Reflective panel 2
+    (130, 16),   # Grass
+    ( 40, 16),   # Tree
+    ( 80, 160),  # Background forest
     (  5, 16),   # Sky
 ]
 PIXEL_LABELS = [
@@ -69,10 +69,10 @@ if _env_pixels.strip():
 
 # Zones for box-plot analysis (center pixel, patch half-size)
 ZONES = {
-    "Target 1": (143, 62),
-    "Target 2": (160, 62),
-    "Tree":     ( 80, 200),
-    "Forest":   ( 40, 62),
+    "Target 1": (187, 86),
+    "Target 2": (145, 18),
+    "Tree":     ( 70, 160),
+    "Forest":   ( 80, 160),
 }
 PATCH_HALF = 4
 

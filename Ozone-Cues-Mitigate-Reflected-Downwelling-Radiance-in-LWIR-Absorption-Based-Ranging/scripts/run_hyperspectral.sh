@@ -2,21 +2,21 @@
 #SBATCH --job-name=ihd_hyperspectral
 #SBATCH --output=logs/out/%j_ihd_hyperspectral.out
 #SBATCH --error=logs/err/%j_ihd_hyperspectral.err
-#SBATCH --time=02:00:00
+#SBATCH --time=05:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
-#SBATCH --mem=25G
+#SBATCH --mem=32G
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 
 set -euo pipefail
 
 DEFAULT_REPO_ROOT='/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging'
-DEFAULT_SCENE_HDR='/disk/IHTest_202104_DistStA/Path5_DistStA/Path5_Step1_DistStA/IHTest_202104_Path5_Step1_LWHSI1_collect0_DistStA.hdr'
+DEFAULT_SCENE_HDR='/disk/IHTest_202104_DistStA/Path5_DistStA/Path5_Step1_DistStA/IHTest_202104_Path5_Step1_LWHSI1_collect1_DistStA.hdr'
 
 # ── Selected pixels for per-pixel analysis (1-indexed row,col; semicolon-separated)
 # Change here to update all figure scripts at once.
-DEFAULT_SELECTED_PIXELS="143,62;160,62;130,62;80,200;40,62;5,16"
+DEFAULT_SELECTED_PIXELS="143,16;160,16;130,16;40,16;80,160;5,16"
 
 HDR_PATH="${1:-$DEFAULT_SCENE_HDR}"
 SELECTED_PIXELS="${2:-$DEFAULT_SELECTED_PIXELS}"

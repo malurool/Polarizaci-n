@@ -3,6 +3,7 @@ import sys
 from types import SimpleNamespace
 
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.patches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -545,10 +546,9 @@ cluster_colors = np.array(
 
 fig6, ax6 = plt.subplots(num=6)
 fig6.set_size_inches(5.6, 5.6)
-im = ax6.imshow(idx, vmin=1, vmax=clusters)
+im = ax6.imshow(idx, vmin=1, vmax=clusters, cmap=ListedColormap(cluster_colors))
 ax6.set_aspect("equal")
 ax6.axis("off")
-ax6.set_cmap(ListedColormap(cluster_colors))
 cb6 = fig6.colorbar(im, ax=ax6, orientation="horizontal", pad=0.05)
 cb6.set_ticks(np.linspace(1, clusters, clusters))
 cb6.set_ticklabels([f"Cluster {i}" for i in range(1, clusters + 1)])
@@ -589,10 +589,9 @@ C_with_dw = C.copy()
 
 fig8, ax8 = plt.subplots(num=8)
 fig8.set_size_inches(5.6, 5.6)
-im = ax8.imshow(idx, vmin=1, vmax=clusters)
+im = ax8.imshow(idx, vmin=1, vmax=clusters, cmap=ListedColormap(cluster_colors))
 ax8.set_aspect("equal")
 ax8.axis("off")
-ax8.set_cmap(ListedColormap(cluster_colors))
 cb8 = fig8.colorbar(im, ax=ax8, orientation="horizontal", pad=0.05)
 cb8.set_ticks(np.linspace(1, clusters, clusters))
 cb8.set_ticklabels([f"Cluster {i}" for i in range(1, clusters + 1)])

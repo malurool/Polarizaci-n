@@ -1,0 +1,3 @@
+# Archivos de resultados grandes (>100MB, no aptos para GitHub)
+results/*.npz
+results/*.mat

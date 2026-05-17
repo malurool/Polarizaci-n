@@ -16,7 +16,7 @@ DEFAULT_SCENE_HDR='/disk/IHTest_202104_DistStA/Path5_DistStA/Path5_Step1_DistStA
 
 # ── Selected pixels for per-pixel analysis (1-indexed row,col; semicolon-separated)
 # Change here to update all figure scripts at once.
-DEFAULT_SELECTED_PIXELS="143,62;160,62;130,62;80,200;40,62;5,62"
+DEFAULT_SELECTED_PIXELS="143,62;160,62;130,62;80,200;40,62;5,16"
 
 HDR_PATH="${1:-$DEFAULT_SCENE_HDR}"
 SELECTED_PIXELS="${2:-$DEFAULT_SELECTED_PIXELS}"

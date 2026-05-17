@@ -111,7 +111,7 @@ _DEFAULT_PIXELS = [
     (130, 62),   # Grass
     ( 80, 200),  # Tree
     ( 40, 62),   # Background forest
-    (  5, 62),   # Sky
+    (  5, 16),   # Sky
 ]
 _DEFAULT_LABELS = ["Refl. panel 1", "Refl. panel 2", "Grass", "Tree", "Background forest", "Sky"]
 _PIXEL_COLORS   = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]

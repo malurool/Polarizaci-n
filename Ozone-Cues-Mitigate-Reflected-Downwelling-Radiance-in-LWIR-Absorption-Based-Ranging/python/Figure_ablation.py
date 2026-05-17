@@ -51,7 +51,7 @@ DEFAULT_PIXELS = [
     (130, 62),   # Grass
     ( 80, 200),  # Tree
     ( 40, 62),   # Background forest
-    (  5, 62),   # Sky
+    (  5, 16),   # Sky
 ]
 PIXEL_LABELS = [
     "Refl. panel 1",

@@ -69,15 +69,12 @@ Q = 10
 
 no_downwelling      = load_npz(RESULTS_DIR, f"{SCENE_NAME}_no_downwelling")
 with_downwelling    = load_npz(RESULTS_DIR, f"{SCENE_NAME}_downwelling")
+with_downwelling_reg = load_npz(RESULTS_DIR, f"{SCENE_NAME}_downwelling_TV")
 
-no_downwelling.d = no_downwelling.d.astype(float)
-with_downwelling.d = with_downwelling.d.astype(float)
-
-no_downwelling.d[no_downwelling.d == 0] = np.nan
-with_downwelling.d[with_downwelling.d == 0] = np.nan
-
-no_downwelling.V  = no_downwelling.V[:, :, :, :Q]
-with_downwelling.V = with_downwelling.V[:, :, :, :Q]
+for ns in (no_downwelling, with_downwelling, with_downwelling_reg):
+    ns.d = ns.d.astype(float)
+    ns.d[ns.d == 0] = np.nan
+    ns.V = ns.V[:, :, :, :Q]
 
 # Load measurements and wavelength from .hdr/.bsq
 meas, lambda_vals = load_hdr_cube(HDR_PATH, n_bands=K)
@@ -169,6 +166,7 @@ fig5.set_size_inches(3.5 * 5.6, 2.5)
 ax5 = fig5.add_subplot(111)
 ax5.plot(no_downwelling.d[:, line_index - 1], linewidth=2, label="Without downwelling correction")
 ax5.plot(with_downwelling.d[:, line_index - 1], linewidth=2, label="Downwelling correction")
+ax5.plot(with_downwelling_reg.d[:, line_index - 1], linewidth=2, label="Downwelling correction (TV)")
 if has_lidar:
     ax5.plot(lidar[:, line_index - 1], "--", linewidth=3, color=[0, 0, 0], label="Lidar (ground truth)")
 ax5.set_ylim([15, 200])
@@ -177,6 +175,27 @@ ax5.set_xlabel("Pixel Index")
 ax5.set_ylabel("Distance (m)")
 ax5.legend(loc="upper right", ncol=2)
 ax5.tick_params(labelsize=15)
+
+# Side-by-side comparison of 3 hyperspectral depth maps (like paper Fig.)
+hyper_variants = [
+    (no_downwelling.d,      "(a) Hyperspectral\n(neglecting downwelling)"),
+    (with_downwelling.d,    "(b) Hyperspectral\n(including downwelling)"),
+    (with_downwelling_reg.d,"(c) Hyperspectral-TV\n(including downwelling)"),
+]
+cmap_hyper = get_parula()
+cmap_hyper = ListedColormap(cmap_hyper(np.linspace(0, 1, 256))[::-1])
+
+fig_h3, axes_h3 = plt.subplots(1, 3, num=50, figsize=(14, 5))
+for ax_h, (d_map, title) in zip(axes_h3, hyper_variants):
+    im_h = ax_h.imshow(d_map, cmap=cmap_hyper, vmin=0, vmax=150)
+    ax_h.set_title(title, fontsize=10)
+    ax_h.axis("off")
+    ax_h.set_aspect("equal")
+    ax_h.axvline(line_index - 1, color=[1, 0, 0], linewidth=1.5, linestyle="--")
+    cb_h = fig_h3.colorbar(im_h, ax=ax_h, orientation="horizontal", pad=0.04, fraction=0.046)
+    cb_h.set_label("Distance (m)")
+    cb_h.set_ticks([0, 150])
+fig_h3.tight_layout()
 
 patch_size = 8
 half_patch = patch_size // 2
@@ -256,17 +275,24 @@ ax103.tick_params(labelsize=25)
 
 print("\n--- Patch Statistics (Mean ± Std, ignoring NaNs) ---")
 
+patch_t1_tv   = extract_patch(with_downwelling_reg.d, center_target_1)
+patch_t2_tv   = extract_patch(with_downwelling_reg.d, center_target_2)
+patch_tree_tv = extract_patch(with_downwelling_reg.d, center_tree)
+
 print("\nCalibration Target 1:")
 print(f"  Without downwelling correction: {np.nanmean(patch_t1_d1):.2f} ± {np.nanstd(patch_t1_d1, ddof=1):.2f} m")
 print(f"  Downwelling correction:         {np.nanmean(patch_t1_d2):.2f} ± {np.nanstd(patch_t1_d2, ddof=1):.2f} m")
+print(f"  Downwelling correction (TV):    {np.nanmean(patch_t1_tv):.2f} ± {np.nanstd(patch_t1_tv, ddof=1):.2f} m")
 
 print("\nCalibration Target 2:")
 print(f"  Without downwelling correction: {np.nanmean(patch_t2_d1):.2f} ± {np.nanstd(patch_t2_d1, ddof=1):.2f} m")
 print(f"  Downwelling correction:         {np.nanmean(patch_t2_d2):.2f} ± {np.nanstd(patch_t2_d2, ddof=1):.2f} m")
+print(f"  Downwelling correction (TV):    {np.nanmean(patch_t2_tv):.2f} ± {np.nanstd(patch_t2_tv, ddof=1):.2f} m")
 
 print("\nTree:")
 print(f"  Without downwelling correction: {np.nanmean(patch_tree_d1):.2f} ± {np.nanstd(patch_tree_d1, ddof=1):.2f} m")
 print(f"  Downwelling correction:         {np.nanmean(patch_tree_d2):.2f} ± {np.nanstd(patch_tree_d2, ddof=1):.2f} m")
+print(f"  Downwelling correction (TV):    {np.nanmean(patch_tree_tv):.2f} ± {np.nanstd(patch_tree_tv, ddof=1):.2f} m")
 
 T_air = 289.7
 
@@ -708,6 +734,7 @@ _dr = os.path.join(FIGURES_DIR, "Hyperspectral_correction", "Range")
 save_fig(fig1, os.path.join(_dr, "hyperspectral_no_downwelling_range"))
 save_fig(fig2, os.path.join(_dr, "hyperspectral_with_downwelling_range"))
 save_fig(fig5, os.path.join(_dr, "hyperspectral_profile_comparison"))
+save_fig(fig_h3, os.path.join(_dr, "hyperspectral_three_variants_comparison"))
 
 _dh = os.path.join(FIGURES_DIR, "Hyperspectral_correction")
 save_fig(fig101, os.path.join(_dh, "hyperspectral_histogram_calibration_target_1"))

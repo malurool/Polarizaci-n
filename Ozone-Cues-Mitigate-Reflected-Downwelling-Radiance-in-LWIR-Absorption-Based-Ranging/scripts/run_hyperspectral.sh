@@ -43,20 +43,24 @@ export SCENE_NAME="$(basename "${HDR_PATH%.*}")"
 export SELECTED_PIXELS
 export T_AIR="${T_AIR:-289.7}"
 
-# ── Step 1: Hyperspectral estimation without downwelling correction (fast) ──
-echo "=== [1/4] Hyperspectral estimation — WITHOUT downwelling ==="
-DOWNWELLING_FLAG=False python "$REPO_DIR/hyperspectral_estimation.py"
+# ── Step 1: Hyperspectral — WITHOUT downwelling ──────────────────────────────
+echo "=== [1/5] Hyperspectral estimation — WITHOUT downwelling ==="
+DOWNWELLING_FLAG=False TV_REG=0 python "$REPO_DIR/hyperspectral_estimation.py"
 
-# ── Step 2: Hyperspectral estimation with downwelling correction ─────────────
-echo "=== [2/4] Hyperspectral estimation — WITH downwelling ==="
-DOWNWELLING_FLAG=True python "$REPO_DIR/hyperspectral_estimation.py"
+# ── Step 2: Hyperspectral — WITH downwelling, no TV ──────────────────────────
+echo "=== [2/5] Hyperspectral estimation — WITH downwelling (no TV) ==="
+DOWNWELLING_FLAG=True TV_REG=0 python "$REPO_DIR/hyperspectral_estimation.py"
 
-# ── Step 3: Hyperspectral figures (T, emissivity, range, pixel overlay) ──────
-echo "=== [3/4] Generating hyperspectral figures ==="
+# ── Step 3: Hyperspectral — WITH downwelling + TV regularization ──────────────
+echo "=== [3/5] Hyperspectral estimation — WITH downwelling + TV ==="
+DOWNWELLING_FLAG=True TV_REG=1e-4 python "$REPO_DIR/hyperspectral_estimation.py"
+
+# ── Step 4: Hyperspectral figures (T, emissivity, range, pixel overlay) ───────
+echo "=== [4/5] Generating hyperspectral figures ==="
 python "$REPO_DIR/python/Figure_hyperspectral_results.py"
 
-# ── Step 4: Ablation study (bispectral vs quadspectral vs hyperspectral) ──────
-echo "=== [4/4] Generating ablation figures ==="
+# ── Step 5: Ablation study (bispectral vs quadspectral vs hyperspectral) ───────
+echo "=== [5/5] Generating ablation figures ==="
 python "$REPO_DIR/python/Figure_ablation.py"
 
 echo ""

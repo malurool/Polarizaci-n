@@ -467,7 +467,12 @@ def solve_full_scene(HSI_directory, filename, downwelling_flag=True, chunk_size=
     os.makedirs(results_dir, exist_ok=True)
 
     scene_name = os.path.splitext(os.path.basename(filename))[0]
-    suffix = 'downwelling' if downwelling_flag else 'no_downwelling'
+    if not downwelling_flag:
+        suffix = 'no_downwelling'
+    elif TV_reg > 0:
+        suffix = 'downwelling_TV'
+    else:
+        suffix = 'downwelling'
     savename = os.path.join(results_dir, f"{scene_name}_{suffix}.npz")
     np.savez(savename, V=V_out, T=T_out, emissivity=emissivity_out, d=d_out)
     print(f"Saved: {savename}")
@@ -484,7 +489,7 @@ def main():
         filename = hdr_path
     lr = .01 # Optimizer learning rate
     emiss_reg = 1e7 # Emissivity smoothness regularization parameter
-    TV_reg = 1e-4 # TV regularization parameter for distance d
+    TV_reg = float(os.getenv("TV_REG", "0"))
     downwelling_flag = os.getenv("DOWNWELLING_FLAG", "True").strip().lower() != "false"
     chunk_size = 128 # Pixel chunk size for processing in GPU
     if downwelling_flag:

@@ -182,7 +182,7 @@ d_quadspectral = quadspectral_estimation(
 # ── Load hyperspectral depth ──────────────────────────────────────────────────
 
 print("Loading hyperspectral results...")
-hyper_dw_path = os.path.join(RESULTS_DIR, f"{SCENE_NAME}_downwelling.npz")
+hyper_dw_path = os.path.join(RESULTS_DIR, f"{SCENE_NAME}_downwelling_TV.npz")   # best variant
 hyper_no_path = os.path.join(RESULTS_DIR, f"{SCENE_NAME}_no_downwelling.npz")
 
 with np.load(hyper_dw_path, allow_pickle=False) as f:

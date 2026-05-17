@@ -76,12 +76,13 @@ ZONES = {
 }
 PATCH_HALF = 4
 
-# Band indices for bispectral / quadspectral (1-indexed arrays → 0-indexed below)
-WATER_ABS_BANDS = np.array([4,10,14,19,23,28,31,37,42,48,54,189,230]) - 1
-CLEAR_BANDS     = np.array([8,13,17,21,25,30,34,39,45,50,59,195,236]) - 1
-OZONE_BAND      = 77 - 1
-OZONE_CLEAR     = 81 - 1
-PAIR_INDEX      = 7   # which water-vapor pair to use for bispectral
+# Band indices — 1-indexed, matching Figure_bispectral_results.py exactly.
+# Subtract 1 when indexing arrays (same convention as original script).
+WATER_ABS_BANDS = np.array([4, 10, 14, 19, 23, 28, 31, 37, 42, 48, 54, 189, 230])
+CLEAR_BANDS     = np.array([8, 13, 17, 21, 25, 30, 34, 39, 45, 50, 59, 195, 236])
+OZONE_BAND      = 77
+OZONE_CLEAR     = 81
+RANGE_PAIR      = 5   # 1-indexed pair used for depth estimation (same as original)
 
 K = 247   # number of spectral bands used
 Q = 10    # number of downwelling radiance components
@@ -154,9 +155,13 @@ lidar[lidar == 0] = np.nan
 # ── Compute bispectral depth ─────────────────────────────────────────────────
 
 print("Computing bispectral depth...")
+idx_1 = WATER_ABS_BANDS[RANGE_PAIR - 1] - 1
+idx_2 = CLEAR_BANDS[RANGE_PAIR - 1] - 1
+idx_3 = OZONE_BAND - 1
+idx_4 = OZONE_CLEAR - 1
+
 d_bispectral = bispectral_estimation(
-    lambda_vals, meas, attenuation,
-    WATER_ABS_BANDS[PAIR_INDEX], CLEAR_BANDS[PAIR_INDEX], T_AIR
+    lambda_vals, meas, attenuation, idx_1, idx_2, T_AIR
 )
 
 # ── Compute quadspectral depth ────────────────────────────────────────────────
@@ -164,15 +169,14 @@ d_bispectral = bispectral_estimation(
 print("Computing quadspectral depth...")
 cor_coeff = np.zeros(len(WATER_ABS_BANDS))
 for i in range(len(WATER_ABS_BANDS)):
-    Y = I_downwelling[WATER_ABS_BANDS[i], :] - I_downwelling[CLEAR_BANDS[i], :]
-    X = I_downwelling[OZONE_BAND, :] - I_downwelling[OZONE_CLEAR, :]
+    Y = I_downwelling[WATER_ABS_BANDS[i] - 1, :] - I_downwelling[CLEAR_BANDS[i] - 1, :]
+    X = I_downwelling[OZONE_BAND - 1, :] - I_downwelling[OZONE_CLEAR - 1, :]
     cor_coeff[i] = (X @ Y) / (X @ X)
 
 d_quadspectral = quadspectral_estimation(
     lambda_vals, meas, attenuation,
-    WATER_ABS_BANDS[PAIR_INDEX], CLEAR_BANDS[PAIR_INDEX],
-    OZONE_BAND, OZONE_CLEAR,
-    T_AIR, cor_coeff[PAIR_INDEX]
+    idx_1, idx_2, idx_3, idx_4,
+    T_AIR, cor_coeff[RANGE_PAIR - 1]
 )
 
 # ── Load hyperspectral depth ──────────────────────────────────────────────────

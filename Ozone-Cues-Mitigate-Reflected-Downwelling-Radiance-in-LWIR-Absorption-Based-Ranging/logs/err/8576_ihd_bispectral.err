@@ -1,0 +1,14 @@
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Functions/bispectral_estimation.py:10: RuntimeWarning: invalid value encountered in log10
+  d_hat = -10 * np.log10(transmittance_hat) / (attenuation[index_1] - attenuation[index_2])
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Functions/quadspectral_estimation.py:25: RuntimeWarning: invalid value encountered in log10
+  d_hat = -10 * np.log10(transmittance_hat) / (attenuation[index_2] - attenuation[index_1])
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Functions/bispectral_estimation.py:10: RuntimeWarning: invalid value encountered in log10
+  d_hat = -10 * np.log10(transmittance_hat) / (attenuation[index_1] - attenuation[index_2])
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Functions/quadspectral_estimation.py:25: RuntimeWarning: invalid value encountered in log10
+  d_hat = -10 * np.log10(transmittance_hat) / (attenuation[index_2] - attenuation[index_1])

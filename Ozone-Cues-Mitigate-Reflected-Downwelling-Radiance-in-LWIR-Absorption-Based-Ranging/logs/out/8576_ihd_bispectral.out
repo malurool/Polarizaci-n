@@ -1,0 +1,34 @@
+
+--- Patch Statistics (crop) (Mean ± Std, ignoring NaNs) ---
+
+Calibration Target 1:
+  Bispectral (Baseline): 41.04 ± 18.14 m
+  Quadspectral:           22.65 ± 13.05 m
+  Lidar (Ground Truth):   29.64 ± 4.17 m
+
+Calibration Target 2:
+  Bispectral (Baseline): 44.78 ± 9.94 m
+  Quadspectral:           28.29 ± 15.84 m
+  Lidar (Ground Truth):   46.60 ± 0.33 m
+
+Tree:
+  Bispectral (Baseline): 82.46 ± 7.75 m
+  Quadspectral:           63.57 ± 9.67 m
+  Lidar (Ground Truth):   51.47 ± 15.13 m
+
+--- Patch Statistics (full) (Mean ± Std, ignoring NaNs) ---
+
+Calibration Target 1:
+  Bispectral (Baseline): 31.80 ± 9.08 m
+  Quadspectral:           24.46 ± 10.67 m
+  Lidar (Ground Truth):   24.11 ± 26.63 m
+
+Calibration Target 2:
+  Bispectral (Baseline): 44.13 ± 7.46 m
+  Quadspectral:           38.26 ± 10.85 m
+  Lidar (Ground Truth):   nan ± nan m
+
+Tree:
+  Bispectral (Baseline): 123.03 ± 71.43 m
+  Quadspectral:           98.36 ± 40.95 m
+  Lidar (Ground Truth):   nan ± nan m

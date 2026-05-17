@@ -1,0 +1,18 @@
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Traceback (most recent call last):
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_hyperspectral_results.py", line 137, in <module>
+    ax1.imshow(no_downwelling.d[:, :], cmap=cmap)
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/__init__.py", line 1524, in inner
+    return func(
+           ^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py", line 5982, in imshow
+    im.set_data(X)
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/image.py", line 685, in set_data
+    self._A = self._normalize_image_array(A)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/image.py", line 653, in _normalize_image_array
+    raise TypeError(f"Invalid shape {A.shape} for image data")
+TypeError: Invalid shape (256, 256, 1, 1) for image data

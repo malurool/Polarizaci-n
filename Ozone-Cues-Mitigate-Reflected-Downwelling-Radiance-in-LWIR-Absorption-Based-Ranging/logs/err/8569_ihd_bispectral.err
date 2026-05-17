@@ -1,0 +1,18 @@
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:20: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  return cm.get_cmap("parula")
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:22: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  return cm.get_cmap("viridis")
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:20: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  return cm.get_cmap("parula")
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:22: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  return cm.get_cmap("viridis")
+/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:7104: RuntimeWarning: All-NaN slice encountered
+  xmin = min(xmin, np.nanmin(xi))
+/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:7105: RuntimeWarning: All-NaN slice encountered
+  xmax = max(xmax, np.nanmax(xi))
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:378: RuntimeWarning: Mean of empty slice
+  f"  Lidar (Ground Truth):   {np.nanmean(patch_t2_lidar):.2f} ± {np.nanstd(patch_t2_lidar, ddof=1):.2f} m"
+/opt/miniforge3/lib/python3.12/site-packages/numpy/lib/nanfunctions.py:1879: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:389: RuntimeWarning: Mean of empty slice
+  f"  Lidar (Ground Truth):   {np.nanmean(patch_tree_lidar):.2f} ± {np.nanstd(patch_tree_lidar, ddof=1):.2f} m"

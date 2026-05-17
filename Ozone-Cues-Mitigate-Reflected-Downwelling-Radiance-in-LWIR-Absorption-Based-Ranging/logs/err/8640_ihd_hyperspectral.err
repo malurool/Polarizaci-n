@@ -1,0 +1,8 @@
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:7104: RuntimeWarning: All-NaN slice encountered
+  xmin = min(xmin, np.nanmin(xi))
+/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:7105: RuntimeWarning: All-NaN slice encountered
+  xmax = max(xmax, np.nanmax(xi))

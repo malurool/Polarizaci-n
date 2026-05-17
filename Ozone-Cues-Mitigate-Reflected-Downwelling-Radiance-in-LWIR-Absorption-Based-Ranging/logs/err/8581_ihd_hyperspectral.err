@@ -1,0 +1,36 @@
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py:478: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  HSI = torch.from_numpy(HSI).float()
+Traceback (most recent call last):
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 559, in <module>
+    main()
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 555, in main
+    V, T, emissivity, d = solve_full_scene(HSI_directory, filename, downwelling_flag=downwelling_flag, chunk_size=chunk_size, lr=lr, num_iterations=num_iterations, emiss_reg=emiss_reg, TV_reg=TV_reg)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 500, in solve_full_scene
+    V, T, emissivity, d = solve(wavelength, dw_r, T_env, HSI_chunk, attenuation, num_iterations=num_iterations,
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 402, in solve
+    plt.savefig('Logs/Loss.png')
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/pyplot.py", line 1250, in savefig
+    res = fig.savefig(*args, **kwargs)  # type: ignore[func-returns-value]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/figure.py", line 3490, in savefig
+    self.canvas.print_figure(fname, **kwargs)
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/backend_bases.py", line 2186, in print_figure
+    result = print_method(
+             ^^^^^^^^^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/backend_bases.py", line 2042, in <lambda>
+    print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+                                                                 ^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/backends/backend_agg.py", line 481, in print_png
+    self._print_pil(filename_or_obj, "png", pil_kwargs, metadata)
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/backends/backend_agg.py", line 430, in _print_pil
+    mpl.image.imsave(
+  File "/opt/miniforge3/lib/python3.12/site-packages/matplotlib/image.py", line 1657, in imsave
+    image.save(fname, **pil_kwargs)
+  File "/opt/miniforge3/lib/python3.12/site-packages/PIL/Image.py", line 2585, in save
+    fp = builtins.open(filename, "w+b")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'Logs/Loss.png'

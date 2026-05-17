@@ -1,0 +1,11 @@
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:20: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  return cm.get_cmap("parula")
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py:22: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  return cm.get_cmap("viridis")
+Traceback (most recent call last):
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py", line 391, in <module>
+    run_mode(measurements, lidar, "crop", 0, "crop")
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py", line 279, in run_mode
+    ax105.set_linewidth(1.5)
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Axes' object has no attribute 'set_linewidth'

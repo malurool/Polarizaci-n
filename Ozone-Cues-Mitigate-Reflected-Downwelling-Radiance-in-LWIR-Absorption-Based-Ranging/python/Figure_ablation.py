@@ -91,10 +91,10 @@ DEPTH_CLIM = (0, 150)   # colorbar limits for depth maps (m)
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
-def save_fig(fig, path):
+def save_fig(fig, path, dpi=150):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     fig.savefig(path + ".pdf", bbox_inches="tight")
-    fig.savefig(path + ".jpg", bbox_inches="tight", dpi=150)
+    fig.savefig(path + ".jpg", bbox_inches="tight", dpi=dpi)
     plt.close(fig)
 
 
@@ -358,10 +358,13 @@ att = attenuation.reshape(1, 1, K)
 ref = reflected.reshape(1, 1, K, Q)
 
 n_px = len(DEFAULT_PIXELS)
-fig_px, axes_px = plt.subplots(n_px, 2, figsize=(12, 3.5 * n_px))
+fig_px, axes_px = plt.subplots(
+    n_px, 2, figsize=(14, 3.2 * n_px),
+    gridspec_kw={"width_ratios": [2, 1]},
+)
 if n_px == 1:
     axes_px = axes_px[np.newaxis, :]
-fig_px.suptitle("Per-pixel radiance fit & residual (Hyperspectral w/ downwelling)", fontsize=12)
+fig_px.suptitle("Per-pixel radiance fit & residual (Hyperspectral w/ downwelling)", fontsize=13)
 
 for px_idx, ((pr, pc), label) in enumerate(zip(DEFAULT_PIXELS, PIXEL_LABELS)):
     r, c = pr - 1, pc - 1
@@ -393,7 +396,7 @@ for px_idx, ((pr, pc), label) in enumerate(zip(DEFAULT_PIXELS, PIXEL_LABELS)):
     ax_res.grid(True, alpha=0.3)
 
 fig_px.tight_layout()
-save_fig(fig_px, os.path.join(FIGURES_DIR, "pixel_analysis", "radiance_and_residual"))
+save_fig(fig_px, os.path.join(FIGURES_DIR, "pixel_analysis", "radiance_and_residual"), dpi=300)
 
 # ── Plot F: Pixel locations overlaid on T and emissivity mean maps ────────────
 

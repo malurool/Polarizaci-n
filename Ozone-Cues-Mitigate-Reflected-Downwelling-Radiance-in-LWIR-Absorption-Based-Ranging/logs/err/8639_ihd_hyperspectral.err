@@ -1,0 +1,15 @@
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:7104: RuntimeWarning: All-NaN slice encountered
+  xmin = min(xmin, np.nanmin(xi))
+/opt/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:7105: RuntimeWarning: All-NaN slice encountered
+  xmax = max(xmax, np.nanmax(xi))
+/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_hyperspectral_results.py:488: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  fig = plt.figure()
+Traceback (most recent call last):
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_hyperspectral_results.py", line 551, in <module>
+    ax6.set_cmap(ListedColormap(cluster_colors))
+    ^^^^^^^^^^^^
+AttributeError: 'Axes' object has no attribute 'set_cmap'. Did you mean: 'set_snap'?

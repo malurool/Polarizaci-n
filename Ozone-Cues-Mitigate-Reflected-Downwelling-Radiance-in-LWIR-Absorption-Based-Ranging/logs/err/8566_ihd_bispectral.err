@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py", line 391, in <module>
+    run_mode(measurements, lidar, "crop", 0, "crop")
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/python/Figure_bispectral_results.py", line 125, in run_mode
+    p2 = ax1.axvline(lambda_vals[water_absorption_bands[pair_index - 1] - 1], color=[0, 0, 0], linewidth=4)
+                                                        ^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'pair_index' where it is not associated with a value

@@ -1,0 +1,21 @@
+/opt/miniforge3/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Traceback (most recent call last):
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 559, in <module>
+    main()
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 555, in main
+    V, T, emissivity, d = solve_full_scene(HSI_directory, filename, downwelling_flag=downwelling_flag, chunk_size=chunk_size, lr=lr, num_iterations=num_iterations, emiss_reg=emiss_reg, TV_reg=TV_reg)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 469, in solve_full_scene
+    HSI, wavelength, dw_r, attenuation, T_air = load_data(HSI_directory, filename, downwelling_flag=downwelling_flag)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/malurool/Polarizaci-n/Ozone-Cues-Mitigate-Reflected-Downwelling-Radiance-in-LWIR-Absorption-Based-Ranging/hyperspectral_estimation.py", line 142, in load_data
+    attenuation = np.reshape(attenuation, (1, 1, K, 1))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/numpy/core/fromnumeric.py", line 285, in reshape
+    return _wrapfunc(a, 'reshape', newshape, order=order)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/miniforge3/lib/python3.12/site-packages/numpy/core/fromnumeric.py", line 59, in _wrapfunc
+    return bound(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^^
+ValueError: cannot reshape array of size 256 into shape (1,1,247,1)
